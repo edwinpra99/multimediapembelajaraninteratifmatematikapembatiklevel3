@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/gambar/logo.png" type="image/png" sizes="16x16">
+    <title>Multimedia Pembelajaran Interaktif</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Custom CSS */
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .header {
+            background-color: #ffffff;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky; /* Sticky header */
+            top: 0;
+            z-index: 1000; /* Make sure the header stays on top */
+            display: none; /* Initially hidden */
+        }
+
+        .header h1 {
+            color: #ffffff; /* White text for the title */
+            font-size: 2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 img {
+            margin-right: 10px; /* Space between logo and text */
+        }
+
+        .header nav {
+            display: flex;
+        }
+
+        .header nav a {
+            color: white;
+            margin-left: 15px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .header nav a.btn-primary {
+            background-color: #0066cc; /* Blue for the "Masuk" button */
+        }
+
+        .header nav a.btn-warning {
+            background-color: #ffcc00; /* Yellow for the "Petunjuk" button */
+        }
+
+        /* Background video container */
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 999; /* Highest priority to ensure video shows first */
+            overflow: hidden;
+            background-color: rgb(0, 0, 0); /* Black background behind video */
+            opacity: 1;
+            transition: opacity 1s ease-in-out; /* Smooth transition */
+        }
+
+        .video-container.hidden {
+            opacity: 0;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none; /* Disable user interaction with the video */
+        }
+
+        /* Background image styling */
+        .background-container {
+            background-image: url('/Foto Dokumen/qw.png'); /* Replace with actual URL of Wudhu image */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 998; /* Lower priority than video */
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Smooth transition */
+        }
+
+        .background-container.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+/* Styling for the welcome text to make it more readable */
+.welcome-text {
+    text-align: center;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better readability */
+    padding: 20px; /* Padding to give space around the text */
+    border-radius: 10px; /* Rounded corners for a modern look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Shadow for more emphasis */
+    position: absolute;
+    top: 40%; /* Posisikan secara vertikal di tengah */
+    left: 50%; /* Posisikan secara horizontal di tengah */
+    transform: translate(-50%, -50%); /* Pusatkan secara sempurna secara horizontal dan vertikal */
+    opacity: 0;
+    transition: all 1.5s cubic-bezier(0.25, 0.1, 0.25, 1); /* Lebih lama dan lebih halus */
+}
+
+/* Ketika teks aktif, akan muncul dengan slide dari atas */
+.welcome-text.active {
+    opacity: 1; /* Tampilkan teks */
+    transform: translate(-50%, -50%); /* Teks berada tepat di tengah */
+}
+
+/* Hapus teks dengan slide jauh ke atas hingga hilang dari layar */
+.welcome-text.exit {
+    opacity: 0;
+    transform: translate(-50%, -300%); /* Geser teks jauh ke atas hingga hilang dari layar */
+}
+
+.welcome-text h2 {
+    font-size: 3rem;
+    color: #ffffff; /* White text to stand out against the background */
+}
+
+.welcome-text h3 {
+    font-size: 2rem;
+    color: #ffcc00; /* Yellow text for the subheading */
+}
+
+.welcome-text h4 {
+    font-size: 1.5rem;
+    color: #00ced1; /* Turquoise text for additional information */
+}
+
+
+
+
+      
+
+       
+
+        /* Button styling */
+        .start-video-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            padding: 20px 40px;
+            background-color: white; /* White background for the button */
+            color: black; /* Black text */
+            font-size: 1.5rem;
+            border: 2px solid black; /* Border for a clearer look */
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions */
+            animation: pulse 2s infinite; /* Pulse effect for attention */
+        }
+
+        .start-video-btn:hover {
+            background-color: #f0f0f0; /* Lighter background on hover */
+            transform: translate(-50%, -50%) scale(1.1); /* Slight scaling on hover */
+        }
+
+        .start-video-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Pulse animation for the button */
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.5);
+            }
+            70% {
+                transform: translate(-50%, -50%) scale(1.1);
+                box-shadow: 0 0 0 30px rgba(0, 0, 0, 0);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header nav a {
+                font-size: 0.9rem;
+                padding: 8px 15px;
+            }
+
+           
+
+            .start-video-btn {
+                font-size: 1.2rem;
+                padding: 15px 30px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .header h1 img {
+                height: 30px;
+            }
+
+            .header nav a {
+                font-size: 0.8rem;
+                padding: 5px 10px;
+            }
+        }
+
+        /* Responsif untuk layar dengan lebar maks 768px */
+/* Responsif untuk layar dengan lebar maks 768px */
+@media (max-width: 768px) {
+    .video-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh; /* Pastikan container memiliki tinggi penuh */
+    }
+
+    .video-container video {
+        width: 100%;
+        height: auto; /* Memastikan proporsi video tetap terjaga */
+    }
+
+    .start-video-btn {
+        font-size: 1.2rem; /* Sesuaikan ukuran tombol untuk layar lebih kecil */
+        padding: 15px 30px;
+    }
+}
+
+/* Responsif untuk layar dengan lebar maks 576px */
+@media (max-width: 576px) {
+    .video-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh; /* Pastikan container memiliki tinggi penuh */
+    }
+
+    .video-container video {
+        width: 100%; /* Lebar penuh untuk perangkat lebih kecil */
+        height: auto; /* Mengatur tinggi agar proporsi tetap sesuai */
+    }
+
+    .start-video-btn {
+        font-size: 1rem; /* Ukuran tombol lebih kecil */
+        padding: 10px 20px;
+    }
+}
+
+
+/* Responsif untuk layar dengan lebar maks 768px */
+@media (max-width: 768px) {
+    .welcome-text {
+        top: 50%; /* Menyesuaikan posisi vertikal */
+        padding: 15px; /* Kurangi padding untuk layar lebih kecil */
+        border-radius: 8px; /* Sedikit kurangi radius sudut */
+        transition: all 1.2s cubic-bezier(0.25, 0.1, 0.25, 1); /* Transisi sedikit lebih cepat */
+    }
+
+    .welcome-text h2 {
+        font-size: 2.5rem; /* Ukuran teks lebih kecil untuk judul */
+    }
+
+    .welcome-text h3 {
+        font-size: 1.8rem; /* Ukuran subjudul lebih kecil */
+    }
+
+    .welcome-text h4 {
+        font-size: 1.3rem; /* Ukuran teks tambahan lebih kecil */
+    }
+}
+
+/* Responsif untuk layar dengan lebar maks 576px */
+@media (max-width: 576px) {
+    .welcome-text {
+        top: 45%; /* Posisi lebih rendah untuk menyesuaikan layar lebih kecil */
+        padding: 10px; /* Kurangi padding lagi untuk layar yang lebih kecil */
+        border-radius: 6px; /* Kurangi radius sudut untuk layar lebih kecil */
+        transition: all 1.2s cubic-bezier(0.25, 0.1, 0.25, 1); /* Transisi sedikit lebih cepat */
+    }
+
+    .welcome-text h2 {
+        font-size: 2rem; /* Ukuran teks lebih kecil untuk judul */
+    }
+
+    .welcome-text h3 {
+        font-size: 1.5rem; /* Ukuran subjudul lebih kecil */
+    }
+
+    .welcome-text h4 {
+        font-size: 1.1rem; /* Ukuran teks tambahan lebih kecil */
+    }
+}
+
+
+    </style>
+</head>
+
+<body>
+    <header class="header" id="header">
+        <h1 class="d-inline">
+            <img src="/gambar/loggo.png" alt="Logo" style="height: 50px;">
+            
+        </h1>
+        <nav>
+            <a href="/Login/login.html" class="btn btn-primary">Masuk</a>
+            <a href="/Materi/petunjuk.html" class="btn btn-warning">Petunjuk</a>
+        </nav>
+    </header>
+
+    
+    <button class="start-video-btn" id="startVideoBtn">Start</button>
+
+
+    <div class="video-container" id="videoContainer">
+        <video id="backgroundVideo" disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" playsinline>
+            <source src="/gambar/bumper.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+ 
+    <div class="container-fluid background-container d-flex align-items-center justify-content-center" id="backgroundImage">
+        <div class="welcome-text text-center">
+            <h2>PENDIDIKAN AGAMA ISLAM</h2>
+            <h3>Media Pembelajaran Interaktif</h3>
+            <h4>Kurikulum Merdeka Untuk Siswa SMA/SMK Sederajat</h4>
+        </div>
+    </div>
+    
+
+
+    <audio id="backgroundMusic">
+        <source src="/Foto Dokumen/b.mp3" type="audio/mpeg">
+        Your browser does not support the audio tag.
+    </audio>
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Get references to video, image background, audio elements, and start button
+        const backgroundVideo = document.getElementById('backgroundVideo');
+        const videoContainer = document.getElementById('videoContainer');
+        const backgroundImage = document.getElementById('backgroundImage');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const startVideoBtn = document.getElementById('startVideoBtn');
+        const header = document.getElementById('header');
+
+        // Check if video and audio have been played before using sessionStorage
+        const hasPlayedVideoAndAudio = sessionStorage.getItem('hasPlayedVideoAndAudio');
+
+        // Function to transition from video to background image
+        function transitionToBackground() {
+            videoContainer.classList.add('hidden'); // Hide the video with transition
+            setTimeout(() => {
+                videoContainer.style.display = 'none'; // Remove video from view after transition
+                backgroundImage.classList.add('visible'); // Show the background image
+                header.style.display = 'flex'; // Show the header after video ends
+            }, 1000); // 1s delay to match the CSS transition
+        }
+
+        // Start video when the button is clicked
+        startVideoBtn.addEventListener('click', function() {
+            backgroundVideo.play();  // Play the video
+            startVideoBtn.style.display = 'none'; // Hide the button after starting the video
+        });
+
+        // If video and audio haven't been played before in this session, show the button
+        if (!hasPlayedVideoAndAudio) {
+            backgroundVideo.addEventListener('ended', function () {
+                transitionToBackground();
+                backgroundMusic.play(); // Play the background music after video
+                sessionStorage.setItem('hasPlayedVideoAndAudio', 'true'); // Mark video and audio as played
+            });
+        } else {
+            // Skip the video and show the background image directly if video and audio have been played
+            backgroundVideo.muted = true;  // Mute the video to avoid audio
+            videoContainer.style.display = 'none';
+            backgroundImage.classList.add('visible');
+            header.style.display = 'flex'; // Show the header immediately if video has already been played
+            startVideoBtn.style.display = 'none'; // Hide the button if video has already been played
+        }
+// Disable looping for the background music
+backgroundMusic.loop = false;
+
+const slides = [
+    {
+        title: "Bilangan Bulat",
+        subtitle: "Multimedia Pembelajaran Interaktif",
+        description: "Kurikulum Merdeka Untuk Siswa SMP/Mts Kelas VII Fase D"
+    },
+];
+
+// Selecting the DOM elements for welcome text
+const welcomeText = document.querySelector('.welcome-text');
+const title = welcomeText.querySelector('h2');
+const subtitle = welcomeText.querySelector('h3');
+const description = welcomeText.querySelector('h4');
+
+// Function to update the text content with the first slide only
+function updateText() {
+    title.textContent = slides[0].title;
+    subtitle.textContent = slides[0].subtitle;
+    description.textContent = slides[0].description;
+}
+
+// Initial slide setup to show the first slide statically
+updateText();
+welcomeText.classList.add('active'); // Ensure the content is visible
+
+
+
+    </script>
+
+</body>
+
+</html>
